@@ -128,6 +128,7 @@ with col2:
                         title="Señal Continua 1",
                         xaxis=dict(range=[-4, 4]),
                         yaxis=dict(range=[0, 2.5]),
+                        showlegend=False,
                     )
                     st.plotly_chart(fig, use_container_width=True)
                 else:
@@ -145,6 +146,7 @@ with col2:
                         title="Señal Continua 2",
                         xaxis=dict(range=[-4, 4]),
                         yaxis=dict(range=[0, 4.5]),
+                        showlegend=False,
                     )
                     st.plotly_chart(fig, use_container_width=True)
 
@@ -195,34 +197,60 @@ with col2:
             elif operation == "Discreta":
                 if signal == "1":
                     fig = go.Figure()
+
+                    for x_val, y_val in zip(n1, x_n):
+                        fig.add_trace(
+                            go.Scatter(
+                                x=[x_val, x_val],  # misma coordenada x
+                                y=[0, y_val],  # desde el eje hasta el valor en y
+                                mode="lines",  # solo dibuja la línea
+                                line=dict(color="green", dash="dash"),
+                                showlegend=False
+                            )
+                        )
+
+                    # Añade los marcadores
                     fig.add_trace(
                         go.Scatter(
                             x=n1,
                             y=x_n,
-                            mode="markers+lines",
-                            line=dict(dash="dash", color="green"),
+                            mode="markers",
                             marker=dict(color="green", size=10),
                             name="Señal Discreta 1",
                         )
                     )
+
                     fig.update_layout(
                         title="Señal Discreta 1",
-                        xaxis=dict(tickmode="array", tickvals=n1),
+                        xaxis=dict(tickmode="array", tickvals=n2),
                         showlegend=False,
                     )
                     st.plotly_chart(fig, use_container_width=True)
                 else:
                     fig = go.Figure()
+                    # Añade las líneas verticales desde el eje x hasta los puntos
+                    for x_val, y_val in zip(n2, x_n2):
+                        fig.add_trace(
+                            go.Scatter(
+                                x=[x_val, x_val],  # misma coordenada x
+                                y=[0, y_val],  # desde el eje hasta el valor en y
+                                mode="lines",  # solo dibuja la línea
+                                line=dict(color="purple", dash="dash"),
+                                showlegend=False
+                            )
+                        )
+
+                    # Añade los marcadores
                     fig.add_trace(
                         go.Scatter(
                             x=n2,
                             y=x_n2,
-                            mode="markers+lines",
-                            line=dict(dash="dash", color="purple"),
+                            mode="markers",
                             marker=dict(color="purple", size=10),
                             name="Señal Discreta 2",
                         )
                     )
+
                     fig.update_layout(
                         title="Señal Discreta 2",
                         xaxis=dict(tickmode="array", tickvals=n2),
