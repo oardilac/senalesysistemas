@@ -196,7 +196,7 @@ def metodo2(t, f, a, t0):  # Metodo 2 transformación
     fig1 = go.Figure()
     fig1.add_trace(
         go.Scatter(
-            x=t1,
+            x=tesc,
             y=f,
             mode="lines",
             name=f"Señal Escalada ({a*x})",
@@ -220,7 +220,7 @@ def metodo2(t, f, a, t0):  # Metodo 2 transformación
     fig2 = go.Figure()
     fig2.add_trace(
         go.Scatter(
-            x=tesc,
+            x=t1,
             y=f,
             mode="lines",
             name=f"Señal Escalada y Desplazada ({a*(x+t0/a)})",
