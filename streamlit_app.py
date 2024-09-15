@@ -257,7 +257,11 @@ def stem(n, f, title, color):
 
     # Actualizar layout del gráfico
     fig.update_layout(
-        title=title, xaxis=dict(tickmode="array", tickvals=n), showlegend=False
+        title=title, 
+        xaxis=dict(tickmode="array", tickvals=n),
+        xaxis_title="Tiempo",
+        yaxis_title="Amplitud",
+        showlegend=False
     )
 
     # Mostrar gráfico
@@ -438,7 +442,7 @@ def suma(t, f):  # Suma para tiempo continuo
     fig.update_layout(
         title="Gráficas de Continuidad en el Tiempo",
         xaxis_title="Tiempo",
-        yaxis_title="Valores de la Función",
+        yaxis_title="Amplitud",
         showlegend=True,
     )
 
@@ -456,7 +460,7 @@ def suma(t, f):  # Suma para tiempo continuo
     fig_sum.update_layout(
         title="Suma de las Funciones Interpoladas",
         xaxis_title="Tiempo",
-        yaxis_title="Valores de la Suma",
+        yaxis_title="Amplitud",
         showlegend=True,
     )
 
@@ -552,6 +556,8 @@ def sumad(n, f):
     fig.update_layout(
         title="Gráficos Stem 1 y 2 Combinados",
         xaxis=dict(tickmode="array", tickvals=np.concatenate((nI, nI2))),
+        xaxis_title="Tiempo",
+        yaxis_title="Amplitud",
         showlegend=True,
     )
 
