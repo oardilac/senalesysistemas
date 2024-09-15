@@ -588,19 +588,19 @@ if operation == "Seleccionar...":
     st.image("aura.jpg", caption="Julio Voltio", use_column_width=True)
 
 elif operation == "Continua":
+    if signal == "1":
+        x = t1_T
+        y = x_t1
+    else:
+        x = t2_T
+        y = x_t2
+
     sum = st.sidebar.radio(
         "Suma",
         ["No", "Si"],
         key="sum_continua",
     )
     if sum == "No":
-        if signal == "1":
-            x = t1_T
-            y = x_t1
-        else:
-            x = t2_T
-            y = x_t2
-
         method = st.sidebar.radio(
             "Metodo",
             ["Desplazamiento/Escalamiento", "Escalamiento/Desplazamiento"],
@@ -646,22 +646,22 @@ elif operation == "Continua":
             metodo2(x, y, a, t0)
 
     else:
-        suma(t1_T, x_t1)
+        suma(x, y)
 
 elif operation == "Discreta":
+    if signal == "1":
+        x = n1
+        y = x_n
+    else:
+        x = n2
+        y = x_n2
+
     sum = st.sidebar.radio(
         "Suma",
         ["No", "Si"],
         key="sum_discreto",
     )
     if sum == "No":
-        if signal == "1":
-            x = n1
-            y = x_n
-        else:
-            x = n2
-            y = x_n2
-
         method = st.sidebar.radio(
             "Metodo",
             ["Metodo 1", "Metodo 2"],
@@ -703,4 +703,4 @@ elif operation == "Discreta":
             metodo2D(x, y, M, n0)
 
     else:
-        sumad(n2, x_n2)
+        sumad(x, y)
