@@ -109,6 +109,9 @@ def metodo1(t, f, a, t0):
         xaxis_range=[x_min, x_max],
     )
 
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
+
     # Gráfico 1: Señal desplazada en el tiempo
     fig1 = go.Figure()
     fig1.add_trace(
@@ -130,6 +133,9 @@ def metodo1(t, f, a, t0):
         xaxis_range=[x_min, x_max],
     )
 
+    fig1.update_xaxes(showgrid=True)
+    fig1.update_yaxes(showgrid=True)
+
     # Gráfico 2: Señal escalada y desplazada en el tiempo
     fig2 = go.Figure()
     fig2.add_trace(
@@ -150,6 +156,9 @@ def metodo1(t, f, a, t0):
         showlegend=False,
         xaxis_range=[x_min, x_max],
     )
+
+    fig2.update_xaxes(showgrid=True)
+    fig2.update_yaxes(showgrid=True)
 
     # Mostrar las tres graficas
     with st.container():
@@ -180,6 +189,9 @@ def metodo2(t, f, a, t0):  # Metodo 2 transformación
         xaxis_range=[x_min, x_max],
     )
 
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
+
     # Gráfico 1: Señal escalada en el tiempo
     fig1 = go.Figure()
     fig1.add_trace(
@@ -201,6 +213,9 @@ def metodo2(t, f, a, t0):  # Metodo 2 transformación
         xaxis_range=[x_min, x_max],
     )
 
+    fig1.update_xaxes(showgrid=True)
+    fig1.update_yaxes(showgrid=True)
+
     # Gráfico 2: Señal desplazada y escalada en el tiempo
     fig2 = go.Figure()
     fig2.add_trace(
@@ -221,6 +236,9 @@ def metodo2(t, f, a, t0):  # Metodo 2 transformación
         showlegend=False,
         xaxis_range=[x_min, x_max],
     )
+
+    fig2.update_xaxes(showgrid=True)
+    fig2.update_yaxes(showgrid=True)
 
     # Mostrar las tres graficas
     with st.container():
@@ -263,6 +281,9 @@ def stem(n, f, title, color):
         yaxis_title="Amplitud",
         showlegend=False
     )
+
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
 
     # Mostrar gráfico
     st.plotly_chart(fig, use_container_width=True)
@@ -446,6 +467,9 @@ def suma(t, f):  # Suma para tiempo continuo
         showlegend=True,
     )
 
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
+
     # Segundo gráfico (Suma de las funciones interpoladas)
     fig_sum = go.Figure()
     fig_sum.add_trace(
@@ -463,6 +487,9 @@ def suma(t, f):  # Suma para tiempo continuo
         yaxis_title="Amplitud",
         showlegend=True,
     )
+
+    fig_sum.update_xaxes(showgrid=True)
+    fig_sum.update_yaxes(showgrid=True)
 
     st.plotly_chart(fig, use_container_width=True)
     st.plotly_chart(fig_sum, use_container_width=True)
@@ -561,6 +588,9 @@ def sumad(n, f):
         showlegend=True,
     )
 
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
+
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
@@ -585,7 +615,7 @@ st.title("Interfaz grafica de procesamiento de señales")
 
 st.sidebar.title("Menu de operaciones")
 operation = st.sidebar.selectbox(
-    "Operaciones", ["Seleccionar...", "Continua", "Discreta"]
+    "Tipo de Señal", ["Seleccionar...", "Continua", "Discreta"]
 )
 
 if operation == "Seleccionar...":
