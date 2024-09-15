@@ -143,12 +143,12 @@ def metodo1(t, f, a, t0):
             x=tesc,
             y=f,
             mode="lines",
-            name=f"Señal Escalada y Desplazada ({a*x + t0})",
+            name=f"Señal Desplazada y Escalada ({a*x + t0})",
             line=dict(color="red"),
         )
     )
     fig2.update_layout(
-        title=f"Señal Escalada y Desplazada: ({a*x + t0})",
+        title=f"Señal Desplazada y Escalada: ({a*x + t0})",
         xaxis_title="Tiempo",
         yaxis_title="Amplitud",
         legend_title="Transformación",
@@ -223,12 +223,12 @@ def metodo2(t, f, a, t0):  # Metodo 2 transformación
             x=tesc,
             y=f,
             mode="lines",
-            name=f"Señal Desplazada y Escalada ({a*(x+t0/a)})",
+            name=f"Señal Escalada y Desplazada ({a*(x+t0/a)})",
             line=dict(color="red"),
         )
     )
     fig2.update_layout(
-        title=f"Señal Desplazada y Escalada: ({a*(x+t0/a)})",
+        title=f"Señal Escalada y Desplazada: ({a*(x+t0/a)})",
         xaxis_title="Tiempo",
         yaxis_title="Amplitud",
         legend_title="Transformación",
@@ -275,11 +275,11 @@ def stem(n, f, title, color):
 
     # Actualizar layout del gráfico
     fig.update_layout(
-        title=title, 
+        title=title,
         xaxis=dict(tickmode="array", tickvals=n),
         xaxis_title="Tiempo",
         yaxis_title="Amplitud",
-        showlegend=False
+        showlegend=False,
     )
 
     fig.update_xaxes(showgrid=True)
@@ -455,20 +455,47 @@ def suma(t, f):  # Suma para tiempo continuo
     x_t2interp = interp_f2(comun_tdf)
     x_tsuma = x_t1_interp + x_t2interp
 
-    # Primer gráfico (tesc vs f y tesc2 vs f)
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=tesc, y=f, mode="lines", name="tesc vs f"))
-    fig.add_trace(go.Scatter(x=tesc2, y=f, mode="lines", name="tesc2 vs f"))
+    col1, col2 = st.columns(2)
+    # Primera columna: 1/4 - t/3
+    with col1:
+        fig1 = go.Figure()
+        fig1.add_trace(go.Scatter(x=tesc, y=f, mode="lines", name="1/4 - t/3"))
 
-    fig.update_layout(
-        title="Gráficas de Continuidad en el Tiempo",
-        xaxis_title="Tiempo",
-        yaxis_title="Amplitud",
-        showlegend=True,
-    )
+        fig1.update_layout(
+            xaxis_title="Tiempo",
+            yaxis_title="Amplitud",
+            showlegend=True,
+        )
 
-    fig.update_xaxes(showgrid=True)
-    fig.update_yaxes(showgrid=True)
+        fig1.update_xaxes(showgrid=True)
+        fig1.update_yaxes(showgrid=True)
+
+        # Mostrar gráfico en la primera columna
+        st.plotly_chart(fig1, use_container_width=True)
+
+    # Segunda columna: t/2 - 1/3
+    with col2:
+        fig2 = go.Figure()
+        fig2.add_trace(
+            go.Scatter(
+                x=tesc2,
+                y=f,
+                mode="lines",
+                name="t/2 - 1/3",
+                line=dict(color="green"),
+            )
+        )
+        fig2.update_layout(
+            xaxis_title="Tiempo",
+            yaxis_title="Amplitud",
+            showlegend=True,
+        )
+
+        fig2.update_xaxes(showgrid=True)
+        fig2.update_yaxes(showgrid=True)
+
+        # Mostrar gráfico en la segunda columna
+        st.plotly_chart(fig2, use_container_width=True)
 
     # Segundo gráfico (Suma de las funciones interpoladas)
     fig_sum = go.Figure()
@@ -477,21 +504,21 @@ def suma(t, f):  # Suma para tiempo continuo
             x=comun_tdf,
             y=x_tsuma,
             mode="lines",
-            name="Suma de las Funciones Interpoladas",
+            name="Suma de las Señales Continuas",
+            line=dict(color="red"),
         )
     )
 
     fig_sum.update_layout(
-        title="Suma de las Funciones Interpoladas",
+        title="Suma de las Señales Continuas",
         xaxis_title="Tiempo",
         yaxis_title="Amplitud",
-        showlegend=True,
+        showlegend=False,
     )
 
     fig_sum.update_xaxes(showgrid=True)
     fig_sum.update_yaxes(showgrid=True)
 
-    st.plotly_chart(fig, use_container_width=True)
     st.plotly_chart(fig_sum, use_container_width=True)
 
 
@@ -534,65 +561,14 @@ def sumad(n, f):
     for i in range(len(nI2)):
         nI2[i] = nI2[i] * -1
 
-    # Crear un gráfico con ambas gráficas stem
-    fig = go.Figure()
+    col1, col2 = st.columns(2)
+    with col1:
+        # Gráfico 1: Secuencia 1
+        stem(nI, x_nM, "x[(n/4)-3]", "green")
 
-    # Añadir gráfica stem verde (primera señal)
-    for x_val, y_val in zip(nI, x_nM):
-        fig.add_trace(
-            go.Scatter(
-                x=[x_val, x_val],  # Misma coordenada x
-                y=[0, y_val],  # Desde el eje hasta el valor en y
-                mode="lines",
-                line=dict(color="green", dash="dash"),
-                showlegend=False,
-            )
-        )
-    fig.add_trace(
-        go.Scatter(
-            x=nI,
-            y=x_nM,
-            mode="markers",
-            marker=dict(color="green", size=10),
-            name="Gráfico Stem 1",
-        )
-    )
-
-    # Añadir gráfica stem roja (segunda señal)
-    for x_val, y_val in zip(nI2, x_nM2):
-        fig.add_trace(
-            go.Scatter(
-                x=[x_val, x_val],
-                y=[0, y_val],
-                mode="lines",
-                line=dict(color="red", dash="dash"),
-                showlegend=False,
-            )
-        )
-    fig.add_trace(
-        go.Scatter(
-            x=nI2,
-            y=x_nM2,
-            mode="markers",
-            marker=dict(color="red", size=10),
-            name="Gráfico Stem 2",
-        )
-    )
-
-    # Actualizar layout del gráfico combinado
-    fig.update_layout(
-        title="Gráficos Stem 1 y 2 Combinados",
-        xaxis=dict(tickmode="array", tickvals=np.concatenate((nI, nI2))),
-        xaxis_title="Tiempo",
-        yaxis_title="Amplitud",
-        showlegend=True,
-    )
-
-    fig.update_xaxes(showgrid=True)
-    fig.update_yaxes(showgrid=True)
-
-    # Mostrar el gráfico en Streamlit
-    st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        # Gráfico 2: Secuencia 2
+        stem(nI2, x_nM2, "x[4-(n/3)]", "red")
 
     min_n = min(nI.min(), nI2.min())
     max_n = max(nI.max(), nI2.max())
@@ -607,11 +583,11 @@ def sumad(n, f):
     x_nsuma = x_nMC + x_nM2C
 
     # Crear el tercer gráfico de stem (suma)
-    stem(comun_n, x_nsuma, "Suma de Señales", "blue")
+    stem(comun_n, x_nsuma, "Suma de Secuencias", "blue")
 
 
 st.set_page_config(layout="wide")
-st.title("Interfaz grafica de procesamiento de señales")
+st.title("Interfaz gráfica de procesamiento de señales")
 
 st.sidebar.title("Menu de operaciones")
 operation = st.sidebar.selectbox(
