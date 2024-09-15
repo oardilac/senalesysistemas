@@ -216,7 +216,7 @@ def metodo2(t, f, a, t0):  # Metodo 2 transformación
     fig1.update_xaxes(showgrid=True)
     fig1.update_yaxes(showgrid=True)
 
-    # Gráfico 2: Señal desplazada y escalada en el tiempo
+    # Gráfico 2: Señal desplazada y escalada
     fig2 = go.Figure()
     fig2.add_trace(
         go.Scatter(
