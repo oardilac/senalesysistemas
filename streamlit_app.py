@@ -290,55 +290,41 @@ def stem(n, f, title, color):
 
 
 def metodo1D(n, f, M, n0):  # Metodo 1 Discreta
+    stem(n, f, "Señal Original", "yellow")
     if abs(M) < 1:
         n1 = n - n0
 
         # Gráfico 1 - Secuencia Desplazada
         stem(n1, f, "Secuencia Desplazada", "green")
-        Z = int(1 / abs(M))
-        L_n = len(f)
-        nI = np.arange(n1[0] * Z, (n1[-1] * Z) + 1)
-        L_nI = len(nI)
-        x_nI0 = np.arange(1, L_nI + 1)
-        x_nIEsc = np.arange(1, L_nI + 1)
+        Z=int(1/abs(M))
+        L_n=len(f)
+        nI=np.arange(n1[0]*Z,(n1[-1]*Z)+1)
+        L_nI=len(nI)
+        x_nI0=np.arange(1,L_nI+1)
+        x_nIEsc=np.arange(1,L_nI+1)
 
-        for k in range(L_nI - 1):  # Escalon y Cero
-            if k % Z == 0:
-                r = int(k * abs(M))
-                x_nI0[k] = f[r]
-                x_nIEsc[k] = f[r]
+        for k in range(L_nI-1):   #Escalon y Cero
+            if k % Z ==0:
+                r=int(k*abs(M))
+                x_nI0[k]=f[r]
+                x_nIEsc[k]=f[r]
             else:
-                x_nI0[k] = 0
-                x_nIEsc[k] = x_nIEsc[k - 1]
-        x_nI0[L_nI - 1] = f[L_n - 1]
-        x_nIEsc[L_nI - 1] = f[L_n - 1]
+                x_nI0[k]=0
+                x_nIEsc[k]=x_nIEsc[k-1]
+        x_nI0[L_nI-1]=f[L_n-1]
+        x_nIEsc[L_nI-1]=f[L_n-1]
 
-        x_nM = np.arange(1, L_nI + 1, dtype=float)
-        k = 0
-        for s in range(L_n - 1):  # Lineal
+        x_nM = np.arange(1, L_nI+1, dtype=float)
+        k=0
+        for s in range (L_n-1):   #Lineal
             x_nM[k] = f[s]
-            for j in range(1, Z):
-                dif = f[s + 1] - f[s]
-                A = j * abs(M) * dif + f[s]
-                x_nM[k + 1] = A
-                k = k + 1
-            k = k + 1
-        x_nM[L_nI - 1] = f[L_n - 1]
-        if M > 0:
-            # Gráfico 2 - Secuencia Escalonada
-            stem(nI, x_nI0, "Secuencia Escalonada", "blue")
-
-            # Gráfico 3 - Secuencia Lineal
-            stem(nI, x_nM, "Secuencia Lineal", "red")
-        else:
-            for i in range(len(nI)):
-                nI[i] = nI[i] * -1
-
-            # Gráfico 2 - Secuencia Escalonada
-            stem(nI, x_nI0, "Secuencia Escalonada", "blue")
-
-            # Gráfico 3 - Secuencia Lineal
-            stem(nI, x_nM, "Secuencia Lineal", "red")
+            for j in range (1,Z):
+                dif = f[s+1] - f[s]
+                A = j*abs(M)*dif + f[s]
+                x_nM[k+1] = A
+                k=k+1
+            k=k+1
+        x_nM[L_nI-1] = f[L_n-1]
     else:
         n1 = n - n0
         new = []
@@ -347,14 +333,15 @@ def metodo1D(n, f, M, n0):  # Metodo 1 Discreta
             if n1[i] % abs(M) == 0:
                 new.append(n1[i] / abs(M))
                 tnd.append(f[i])
+        stem(n1, f, "Secuencia Desplazada", "green")
         if M > 0:
             # Gráfico 1 - Secuencia Transformada
-            stem(new, tnd, "Secuencia Transformada", "green")
+            stem(new, tnd, "Secuencia Desplazada y Transformada", "red")
         else:
             for i in range(len(new)):
                 new[i] = new[i] * -1
             # Gráfico 1 - Secuencia Transformada
-            stem(new, tnd, "Secuencia Transformada", "green")
+            stem(new, tnd, "Secuencia Desplazada y Transformada", "red")
 
 
 def metodo2D(n, f, M, n0):
@@ -676,7 +663,7 @@ elif operation == "Discreta":
     if sum == "No":
         method = st.sidebar.radio(
             "Metodo",
-            ["Metodo 1", "Metodo 2"],
+            ["Desplazamiento/Escalamiento", "Escalamiento/Desplazamiento"],
             key="method_discreta",
         )
 
@@ -709,9 +696,9 @@ elif operation == "Discreta":
             value=1,
         )
 
-        if method == "Metodo 1":
+        if method == "Desplazamiento/Escalamiento":
             metodo1D(x, y, M, n0)
-        elif method == "Metodo 2":
+        else:
             metodo2D(x, y, M, n0)
 
     else:
