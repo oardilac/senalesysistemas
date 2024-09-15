@@ -581,13 +581,13 @@ st.sidebar.title("Menu de operaciones")
 operation = st.sidebar.selectbox(
     "Operaciones", ["Seleccionar...", "Continua", "Discreta"]
 )
-signal = st.sidebar.radio("Señal", ["1", "2"])
 
 if operation == "Seleccionar...":
     st.header("El bicho")
     st.image("aura.jpg", caption="Julio Voltio", use_column_width=True)
 
 elif operation == "Continua":
+    signal = st.sidebar.radio("Señal", ["1", "2"])
     if signal == "1":
         x = t1_T
         y = x_t1
@@ -632,7 +632,6 @@ elif operation == "Continua":
             ),
             value=2,
             key="a",
-            label_visibility="collapsed",
         )
         t0 = st.sidebar.select_slider(
             "t0",
@@ -649,6 +648,7 @@ elif operation == "Continua":
         suma(x, y)
 
 elif operation == "Discreta":
+    signal = st.sidebar.radio("Señal", ["1", "2"])
     if signal == "1":
         x = n1
         y = x_n
