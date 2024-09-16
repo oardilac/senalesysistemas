@@ -45,30 +45,7 @@ x2_5 = np.ones(len(t5_2))
 x_t2 = np.concatenate((x2_1, x2_2, x2_3, x2_4, x2_5, [0]))  # Funcion 2 continua
 
 
-x_n = [
-    0,
-    0,
-    0,
-    0,
-    0,
-    -3,
-    0,
-    5,
-    4,
-    -2,
-    -4,
-    -1,
-    2,
-    5,
-    7,
-    4,
-    -2,
-    0,
-    0,
-    0,
-    0,
-    0,
-]  # Secuencia Discreta
+x_n=[0,0,0,0,0,-3,0,5,4,-2,-4,-1,2,5,7,4,-2,0,0,0,0,0]  #Secuencia Discreta
 
 x_n2_1 = np.zeros(len(n2_1))
 
@@ -440,7 +417,6 @@ def metodo2D(n, f, M, n0):
                 new.append(n[i] / abs(M))
                 tnd.append(f[i])
         stem(new, tnd, "Secuencia Escalonada", "green")
-        n1 = n - n0
         new2=[]
         tnd2=[]
         new3=[]
@@ -628,6 +604,14 @@ if operation == "Menú Inicial...":
     st.markdown(r"Una señal $x(t)$ se escala en el tiempo cuando la variable t es multiplicada por un valor absoluto $|a|$ mayor o menor que uno, es decir, $x(at)$. Si $|a|$ es mayor que 1, la señal se comprime por ese factor; si es menor que 1, se expande por el mismo factor. Cada valor de $t$ se multiplica por el inverso de $a$ para obtener los nuevos valores.")
     st.markdown(r"Hay dos formas de transformar una señal $x(t)$ en el tiempo: primero desplazarla y luego escalarla, o realizar el proceso en el orden inverso.")
     st.markdown("Creado por: Oliver Ardila, Juan Bermejo y Daniel Henriquez")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("aura.jpg", width=400)
+    with col2:
+        st.image("lena.png", width=400)
+
+    st.markdown("Damos gracias a Cristiano Ronaldo y a Lena Gray por el desarrollo de esta interfaz gráfica.")
 
 elif operation == "Continua":
     signal = st.sidebar.radio("Señal", ["1", "2"])
