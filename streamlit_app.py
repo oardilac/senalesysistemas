@@ -627,7 +627,7 @@ if operation == "Menú Inicial...":
     st.markdown("##### Escalamiento en el tiempo #####")
     st.markdown(r"Una señal $x(t)$ se escala en el tiempo cuando la variable t es multiplicada por un valor absoluto $|a|$ mayor o menor que uno, es decir, $x(at)$. Si $|a|$ es mayor que 1, la señal se comprime por ese factor; si es menor que 1, se expande por el mismo factor. Cada valor de $t$ se multiplica por el inverso de $a$ para obtener los nuevos valores.")
     st.markdown(r"Hay dos formas de transformar una señal $x(t)$ en el tiempo: primero desplazarla y luego escalarla, o realizar el proceso en el orden inverso.")
-
+    st.markdown("Creado por: Oliver Ardila, Juan Bermejo y Daniel Henriquez")
 
 elif operation == "Continua":
     signal = st.sidebar.radio("Señal", ["1", "2"])
