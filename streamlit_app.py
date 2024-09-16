@@ -441,20 +441,25 @@ def metodo2D(n, f, M, n0):
                 tnd.append(f[i])
         stem(new, tnd, "Secuencia Escalonada", "green")
         n1 = n - n0
-        new2 = []
-        tnd2 = []
-        for i in range(len(n1)):
-            if n1[i] % abs(M) == 0:
-                new2.append(n1[i] / abs(M))
-                tnd2.append(f[i])
+        new2=[]
+        tnd2=[]
+        new3=[]
+        for i in range(len(n)):
+            new2.append(n[i]/abs(M))
+        for i in range(len(new2)):
+            new2[i]=new2[i]-(n0/abs(M))
+            if isinstance(new2[i], float):
+                if new2[i].is_integer():
+                    new3.append(new2[i])
+                    tnd2.append(f[i])
         if M > 0:
             # Gráfico 2 - Transformación positiva
-            stem(new2, tnd2, "Secuencia Escalonada y Desplazada", "blue")
+            stem(new3, tnd2, "Secuencia Escalonada y Desplazada", "blue")
         else:
-            for i in range(len(new2)):
-                new2[i] = new2[i] * -1
+            for i in range(len(new3)):
+                new3[i]=new3[i]*-1
             # Gráfico 2 - Transformación negativa
-            stem(new2, tnd2, "Secuencia Escalonada y Desplazada", "blue")
+            stem(new3, tnd2, "Secuencia Escalonada y Desplazada", "blue")
 
 
 def suma(t, f):  # Suma para tiempo continuo
