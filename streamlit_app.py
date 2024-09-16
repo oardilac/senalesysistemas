@@ -614,12 +614,20 @@ st.title("Interfaz gráfica de procesamiento de señales")
 
 st.sidebar.title("Menu de operaciones")
 operation = st.sidebar.selectbox(
-    "Tipo de Señal", ["Seleccionar...", "Continua", "Discreta"]
+    "Tipo de Señal", ["Menú Inicial...", "Continua", "Discreta"]
 )
 
-if operation == "Seleccionar...":
-    st.header("El bicho")
-    st.image("aura.jpg", caption="Julio Voltio", use_column_width=True)
+if operation == "Menú Inicial...":
+    st.markdown("Este laboratorio tiene como objetivo poner en práctica los conceptos teóricos aprendidos en el curso de Señales y Sistemas. Aquí tendrás la oportunidad de realizar operaciones fundamentales de transformación de señales y visualizar los resultados en un entorno gráfico computacional.")
+    st.markdown("Para comenzar a usar la aplicación, dirígete a la parte izquierda y selecciona el menú desplegable debajo del menú de operaciones. Desde allí podrás escoger el tipo de señal con la que deseas trabajar y también volver a esta pestaña cuando lo desees.")
+    st.subheader("Explicación Teorica de las transformaciones")
+    st.markdown("La transformación de señales se refiere a los cambios que pueden producirse en los parámetros que componen una señal. Hay dos tipos principales de transformaciones: el escalamiento y el desplazamiento. Es importante analizar por separado las transformaciones en tiempo continuo y en tiempo discreto debido a las diferencias significativas entre ambos casos.")
+    st.markdown("##### Desplazamiento en el tiempo #####")
+    st.markdown(r"Una señal $x(t)$ se desplaza en el tiempo cuando la variable $t$ en dicha señal se suma o se resta por un valor $t_0$. El desplazamiento es hacia la derecha, o un retardo, si es $-t_0$, y hacia la izquierda, o un adelanto, si es $+t_0$. Si la señal experimenta una reflexión, es decir, cuando la variable t se multiplica por menos uno $x(-t)$, los desplazamientos ocurren en la dirección opuesta.")
+    st.markdown("##### Escalamiento en el tiempo #####")
+    st.markdown(r"Una señal $x(t)$ se escala en el tiempo cuando la variable t es multiplicada por un valor absoluto $|a|$ mayor o menor que uno, es decir, $x(at)$. Si $|a|$ es mayor que 1, la señal se comprime por ese factor; si es menor que 1, se expande por el mismo factor. Cada valor de $t$ se multiplica por el inverso de $a$ para obtener los nuevos valores.")
+    st.markdown(r"Hay dos formas de transformar una señal $x(t)$ en el tiempo: primero desplazarla y luego escalarla, o realizar el proceso en el orden inverso.")
+
 
 elif operation == "Continua":
     signal = st.sidebar.radio("Señal", ["1", "2"])
