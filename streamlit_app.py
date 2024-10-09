@@ -135,7 +135,7 @@ def graficar(t, x_t, h, h_t):
     fig_convolucion = go.Figure(data=[trace_convolucion], layout=layout_convolucion)
 
     # Renderizar la figura actualizada en col2 (convolución)
-    plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True)
+    plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True, key="convolution_chart")
 
     # Animar la señal en movimiento (h_t)
     for j in range(len(x_full)):
@@ -146,13 +146,12 @@ def graficar(t, x_t, h, h_t):
         # Renderizar la figura actualizada en col1 (señales en movimiento)
         fig_convolucion.data[0].y = y_full[:j+1]
         
-        plot_placeholder_1.plotly_chart(fig_señales, use_container_width=True)
+        plot_placeholder_1.plotly_chart(fig_señales, use_container_width=True, key=f"signal_chart_{j}")
 
         # Renderizar la figura actualizada en col2 (convolución)
-        plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True)
+        plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True, key=f"convolution_chart_{j}")
         # Agregar un pequeño retardo para la animación final
         time.sleep(0.01)
-
 
 st.set_page_config(layout="wide")
 st.title("Interfaz gráfica de convolución de señales")
