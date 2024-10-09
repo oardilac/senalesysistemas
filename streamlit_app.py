@@ -57,6 +57,24 @@ xd3=np.exp(-td3)
 xd4=[0]
 x_td = np.concatenate((xd, xd2,xd3,xd4 ))   #Funcion d Continua
 
+na=np.arange(-5,5+1)
+xn_a=np.zeros(len(na))
+for i in range(len(na)):
+  xn_a[i]=6-abs(na[i])
+
+ha=np.arange(-5,5+1)
+hn_a=np.ones(len(ha))
+
+nb=np.arange(-2,8+1)
+xn_b=np.ones(len(nb))
+
+hb=np.arange(-1,9+1)
+hn_b=np.zeros(len(hb))
+for i in range(len(hb)):
+  hn_b[i]=(9/11)**(hb[i])
+
+
+
 def invertir(t, x_t):
     return -t[::-1], x_t[::-1]
 
@@ -77,7 +95,7 @@ def grafica_continua(t, x_t, color, title):
     st.plotly_chart(fig, use_container_width=True)
 
 
-def graficar(t, x_t, h, h_t):
+def convolucion_continua(t, x_t, h, h_t):
     # Convolución usando numpy (sin hacer en cada paso)
     y_conv = np.convolve(x_t, h_t) * Delta
     # Ajustar el tiempo para la convolución
@@ -153,6 +171,137 @@ def graficar(t, x_t, h, h_t):
         # Agregar un pequeño retardo para la animación final
         time.sleep(0.01)
 
+def stem(n, f, title, color):
+    fig = go.Figure()
+
+    # Añadir las líneas de los "stems"
+    for x_val, y_val in zip(n, f):
+        fig.add_trace(
+            go.Scatter(
+                x=[x_val, x_val],  # misma coordenada x
+                y=[0, y_val],  # desde el eje hasta el valor en y
+                mode="lines",  # solo dibuja la línea
+                line=dict(color=color, dash="dash"),
+                showlegend=False,
+            )
+        )
+
+    # Añadir los marcadores
+    fig.add_trace(
+        go.Scatter(
+            x=n,
+            y=f,
+            mode="markers",
+            marker=dict(color=color, size=10),
+            name=title,
+        )
+    )
+
+    # Actualizar layout del gráfico
+    fig.update_layout(
+        title=title,
+        xaxis=dict(tickmode="array", tickvals=n),
+        xaxis_title="Tiempo",
+        yaxis_title="Amplitud",
+        showlegend=False,
+    )
+
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
+
+    # Mostrar gráfico
+    st.plotly_chart(fig, use_container_width=True)
+
+def invertir_discreta(x, y):
+    return [-1 * i for i in x[::-1]], y[::-1]
+
+def convolucion_discreta(x, h, x_n, h_n):
+    # Longitudes de las señales
+    Lx = len(x)
+    Lh = len(h)
+    
+    # Tamaño de la señal convolucionada
+    Lc = Lx + Lh - 1
+    
+    # Inicializar resultado de la convolución
+    y = np.zeros(Lc)
+    
+    # Indices de tiempo para la convolución
+    n_conv = np.arange(x_n[0] + h_n[0], x_n[-1] + h_n[-1] + 1)
+
+    # Configuración de las columnas en Streamlit
+    col1, col2 = st.columns(2)
+
+    # Graficar la señal fija (x[n])
+    trace_x = go.Scatter(x=x_n, y=x, mode='markers+lines', name='Señal x[n]')
+    
+    # Crear layout para la gráfica de las señales
+    layout_signals = go.Layout(
+        title="Señal fija x[n] y señal desplazada h[n-k]",
+        xaxis=dict(title="n"),
+        yaxis=dict(title="Amplitud"),
+        showlegend=True
+    )
+
+    # Crear la figura con la señal fija
+    fig_signals = go.Figure(data=[trace_x], layout=layout_signals)
+
+    # Crear la gráfica de la convolución (inicialmente vacía)
+    layout_conv = go.Layout(
+        title="Resultado de la convolución y[n]",
+        xaxis=dict(title="n"),
+        yaxis=dict(title="Amplitud"),
+        showlegend=True
+    )
+    
+    fig_conv = go.Figure(layout=layout_conv)
+    
+    # Renderizar ambas gráficas inicialmente
+    plot_placeholder_1 = col1.empty()
+    plot_placeholder_2 = col2.empty()
+    
+    # Mostrar las señales y la convolución inicial
+    plot_placeholder_1.plotly_chart(fig_signals, use_container_width=True)
+    plot_placeholder_2.plotly_chart(fig_conv, use_container_width=True)
+
+    # Animar la convolución paso a paso
+    for n in range(Lc):
+        # Desplazamos h[n] y multiplicamos
+        h_desplazada = np.zeros(Lc)
+
+        # Aquí verificamos que no tratemos de asignar más valores de los que caben en el array
+        desplazamiento_max = min(Lh, Lc - n)
+        h_desplazada[n:n+desplazamiento_max] = h[:desplazamiento_max]
+        
+        # Actualizamos la gráfica de h[n] desplazada
+        if len(fig_signals.data) > 1:
+            # Actualizamos la traza de h[n] existente
+            fig_signals.data[1].x = n_conv
+            fig_signals.data[1].y = h_desplazada
+        else:
+            # Agregamos la traza de h[n] desplazada si no existe
+            trace_h = go.Scatter(x=n_conv, y=h_desplazada, mode='markers+lines', name=f'h[n-{n}]', marker=dict(color='orange'))
+            fig_signals.add_trace(trace_h)
+
+        # Calcular la multiplicación en cada punto y el valor parcial de la convolución
+        y[n] = np.sum(x * h_desplazada[:Lx])
+        
+        # Actualizamos la gráfica de la convolución con el nuevo valor
+        if len(fig_conv.data) > 0:
+            # Si ya existe la traza de convolución, actualizamos
+            fig_conv.data[0].y = y
+        else:
+            # Si no existe, la creamos
+            trace_y = go.Scatter(x=n_conv, y=y, mode='markers+lines', name='Convolución y[n]', marker=dict(color='blue'))
+            fig_conv.add_trace(trace_y)
+        
+        # Mostrar las señales actualizadas y la convolución
+        plot_placeholder_1.plotly_chart(fig_signals, use_container_width=True)
+        plot_placeholder_2.plotly_chart(fig_conv, use_container_width=True)
+        
+        # Agregar un retardo para la animación
+        time.sleep(0.5)
+
 st.set_page_config(layout="wide")
 st.title("Interfaz gráfica de convolución de señales")
 
@@ -219,9 +368,50 @@ elif operation == "Continua":
                 t_inv, x_inv = invertir(x, y)
                 grafica_continua(t_inv, x_inv, "green", "x(t) invertida")
                 st.markdown("### Proceso de convolución ###")
-                graficar(h, z, x, y)
+                convolucion_continua(h, z, x, y)
             elif inv == "h(t)":
                 t_inv, x_inv = invertir(h, z)
                 grafica_continua(t_inv, x_inv, "green", "h(t) invertida")
                 st.markdown("### Proceso de convolución ###")
-                graficar(x, y, h, z)
+                convolucion_continua(x, y, h, z)
+elif operation == "Discreta":
+    punto = st.sidebar.selectbox("Señal x[n]", ["Seleccione", "A", "B"])
+    if punto == "Seleccione":
+        st.error("Seleccione las señales a graficar")
+    else:
+        if punto == "A":
+            col1, col2 = st.columns(2)
+            with col1:
+                x = na
+                y = xn_a
+                stem(na, xn_a, "x[n]", "blue")
+            with col2:
+                h = ha
+                z = hn_a
+                stem(ha, hn_a, "h[n]", "red")
+
+        elif punto == "B":
+            col1, col2 = st.columns(2)
+            with col1:
+                x = nb
+                y = xn_b
+                stem(nb, xn_b, "x[n]", "blue")
+            with col2:
+                h = hb
+                z = hn_b
+                stem(hb, hn_b, "h[n]", "red")
+
+        invertir = st.sidebar.selectbox("Cual señal desea invertir", ["Seleccione", "x[n]", "h[n]"])
+        if invertir == "Seleccione":
+            st.error("Seleccione la señal a invertir")
+        else:
+            if invertir == "x[n]":
+                x_inv, y_inv = invertir_discreta(x, y)
+                stem(x_inv, y_inv, "x[n] invertida", "green")
+
+                convolucion_discreta(h, x, z, y)
+            elif invertir == "h[n]":
+                h_inv, z_inv = invertir_discreta(h, z)
+                stem(h_inv, z_inv, "h[n] invertida", "green")
+
+                convolucion_discreta(x, h, z, y)
