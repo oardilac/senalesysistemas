@@ -172,119 +172,125 @@ def convolucion_continua(t, x_t, h, h_t):
         time.sleep(0.01)
 
 def stem(n, f, title, color):
-    fig = go.Figure()
-
-    # Añadir las líneas de los "stems"
+    # Crear las coordenadas para las líneas verticales
+    line_x = []
+    line_y = []
     for x_val, y_val in zip(n, f):
-        fig.add_trace(
-            go.Scatter(
-                x=[x_val, x_val],  # misma coordenada x
-                y=[0, y_val],  # desde el eje hasta el valor en y
-                mode="lines",  # solo dibuja la línea
-                line=dict(color=color, dash="dash"),
-                showlegend=False,
-            )
-        )
-
-    # Añadir los marcadores
-    fig.add_trace(
-        go.Scatter(
-            x=n,
-            y=f,
-            mode="markers",
-            marker=dict(color=color, size=10),
-            name=title,
-        )
+        line_x.extend([x_val, x_val, None])  # Añadir None para separar las líneas
+        line_y.extend([0, y_val, None])
+    
+    # Crear la traza para las líneas verticales
+    lines = go.Scatter(
+        x=line_x,
+        y=line_y,
+        mode='lines',
+        line=dict(color=color),
+        showlegend=False
     )
-
-    # Actualizar layout del gráfico
+    
+    # Crear la traza para los marcadores
+    markers = go.Scatter(
+        x=n,
+        y=f,
+        mode='markers',
+        marker=dict(color=color, size=10),
+        name=title
+    )
+    
+    # Crear la figura y añadir las trazas
+    fig = go.Figure(data=[lines, markers])
+    
+    # Actualizar el layout de la figura
     fig.update_layout(
         title=title,
         xaxis=dict(tickmode="array", tickvals=n),
         xaxis_title="Tiempo",
         yaxis_title="Amplitud",
-        showlegend=False,
+        showlegend=True,
+        template='plotly_white'
     )
-
+    
     fig.update_xaxes(showgrid=True)
     fig.update_yaxes(showgrid=True)
-
+    
     return fig
 
 def invertir_discreta(x, y):
     return [-1 * i for i in x[::-1]], y[::-1]
 
 def convolucion_discreta(x, h, x_n, h_n):
-    # Longitudes de las señales
-    Lh = len(h)
-
-    Pi_x = x[0]
-    Pf_x = x[-1]
-    Pi_h = h[0]
-
     # Convolución
     y_n = np.convolve(x_n, h_n)
     # Ajustar el tiempo para la convolución
-    n_conv = np.arange(Pi_x + Pi_h, Pi_x + Pi_h + len(y_n))
-
-    interp_func = interp1d(n_conv, y_n, bounds_error=False, fill_value=0)
-    
-    eje_n = np.arange(Pi_x - Lh, Pf_x + Lh + 1)
-    y_full = interp_func(eje_n)
-
+    n_conv = np.arange(x[0] + h[0], x[0] + h[0] + len(y_n))
     h, h_n = invertir_discreta(h, h_n)
+    interp_func = interp1d(n_conv, y_n, bounds_error=False, fill_value=0)
+
+    n_min = min(min(x)-5, min(h)-1)
+    n_max = max(max(x)+5, max(h)+1)
 
     fig_senales_fija = stem(x, x_n, "Señal Fija", "red")
-    fig_senales_movil = stem(h, h_n, "Señal en Movimiento", "blue")
-    fig_combined = go.Figure(data=fig_senales_fija.data + fig_senales_movil.data)
-
-    fig_combined.update_layout(
-        title='Señales: Fija y en Movimiento',
-        xaxis=dict(showgrid=True, range=[Pi_x - Lh, Pf_x + Lh + 1]),
+    fig_senales_fija.update_layout(
+        xaxis=dict(showgrid=True, range=[n_min, n_max]),
         yaxis=dict(showgrid=True),
+        title='Señales: Fija y en Movimiento'
     )
 
-    # Crear la figura para la convolución
-    trace_convolucion = go.Scatter(
-        x=eje_n,
-        y=y_full,
-        mode='lines+markers',
-        marker=dict(size=10, color='green'),
-        line=dict(color='green', dash="dash"),
-        name="Convolución"
-    )
+    shift_min = x[0] - 20 - h[0]
+    shift_max = x[-1] + 20 - h[-1]
 
-    layout_convolucion = go.Layout(
-        xaxis=dict(showgrid=True, autorange=True),
-        yaxis=dict(showgrid=True),
-        title='Convolución'
-    )
+    x_full = np.arange(shift_min, shift_max)
+    y_full = interp_func(x_full)
 
-    fig_convolucion = go.Figure(data=[trace_convolucion], layout=layout_convolucion)
-
+    fig_convolucion = stem(x_full, y_full, "Convolución", "green")
 
     # Configuración de las columnas en Streamlit
     col1, col2 = st.columns(2)
     plot_placeholder_1 = col1.empty()
-    # Contenedor para la convolución (col2 para convolución)
     plot_placeholder_2 = col2.empty()
+    
+    plot_placeholder_1.plotly_chart(fig_senales_fija, use_container_width=True, key="signals_chart_initial")
 
-    plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True, key="convolution_chart")
+    fig_senales_movil = go.Figure()
+    
+    # Crear una figura vacía para la convolución
+    fig_convolucion = go.Figure()
 
-    # Loop para actualizar las señales
-    for n in range(len(y_full)):
-        new_h = h + eje_n[n]
-        # Actualizar la señal desplazada en la gráfica
-        fig_senales_movil.data[1].y = new_h  # Actualiza la traza de h[k-n]
-
-        # Actualizar la convolución parcial en la gráfica
-        fig_convolucion.data[0].y = y_full[:n+1]  # Mostrar la convolución parcial
-
-        # Mostrar los gráficos actualizados
-        plot_placeholder_1.plotly_chart(fig_combined, use_container_width=True, key=f"signal_chart_{n}")
-        plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True, key=f"convolution_chart_{n}")
-
+    plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True, key="convolution_chart_initial")
+    
+    # Desplazamiento dinámico de h_n_rev y actualización de las gráficas
+    for shift in range(len(y_full)):
+        # Calcular el desplazamiento actual
+        new_h = h + x_full[shift]
+        # Crear la gráfica de la señal móvil desplazada
+        fig_senales_movil = stem(new_h, h_n, "Señal en Movimiento", "blue")
+        
+        # Combinar la señal fija y la señal móvil desplazada
+        fig_combined = go.Figure(data=fig_senales_fija.data + fig_senales_movil.data)
+        
+        fig_combined.update_layout(
+            title='Señales: Fija y en Movimiento',
+            xaxis=dict(showgrid=True, range=[n_min, n_max]),
+            yaxis=dict(showgrid=True),
+            template='plotly_white'
+        )
+        
+        # Actualizar la figura combinada en Streamlit
+        plot_placeholder_1.plotly_chart(fig_combined, use_container_width=True, key=f"signals_chart_{shift}")
+        
+        # Actualizar la convolución parcial
+        y_partial = y_full[:shift+1]
+        n_partial = x_full[:shift+1]
+        
+        # Actualizar la traza de convolución parcial
+        fig_convolucion = stem(n_partial, y_partial, "Convolucion", "green")
+        
+        # Actualizar la figura de convolución en Streamlit
+        plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True, key=f"convolution_chart_{shift}")
+        
+        # Pausa para visualizar el desplazamiento
         time.sleep(0.5)
+
         
 st.set_page_config(layout="wide")
 st.title("Interfaz gráfica de convolución de señales")
