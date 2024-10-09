@@ -3,6 +3,7 @@ import numpy as np
 import plotly.graph_objs as go
 import streamlit as st
 import time
+from scipy.interpolate import interp1d
 
 Delta = 0.01    # Delta
 
@@ -75,25 +76,77 @@ def grafica_continua(t, x_t, color, title):
     # Mostrar gráfico en la primera columna
     st.plotly_chart(fig, use_container_width=True)
 
-def graficar(t, x_t):
-    plot_placeholder = st.empty()
 
-    # Crear la figura inicial
-    trace = go.Scatter(x=t, y=x_t, mode='lines', name='Señal Invertida')
-    layout = go.Layout(xaxis=dict(range=[-21, 21]), yaxis=dict(range=[-3, 3]), title='Señal Invertida en Movimiento')
-    fig = go.Figure(data=[trace], layout=layout)
+def graficar(t, x_t, h, h_t):
+    # Convolución usando numpy (sin hacer en cada paso)
+    y_conv = np.convolve(x_t, h_t) * Delta
+    # Ajustar el tiempo para la convolución
+    t_conv = np.arange(t[0] + h[0], t[-1] + h[-1] + 3*Delta, Delta)
 
-    # Actualizar la señal para moverla de izquierda a derecha en el eje X
-    for shift in np.linspace(-20, 20, 20):
-        # Actualizar los valores de X para moverlos
-        new_x = t + shift
-        fig.data[0].x = new_x
-        
-        # Renderizar la figura actualizada en el mismo lienzo
-        plot_placeholder.plotly_chart(fig, use_container_width=True)
-        
-        # Agregar un pequeño retardo para ver la animación
-        time.sleep(0.3)
+    # Invertir la señal h(t)
+    h_t, h = invertir(h_t, h)
+    
+    # Definir los límites de las gráficas
+    x_min = min(t.min()-1, h.min()-1)
+    x_max = max(t.max()+1, h.max()+1)
+    t_full = np.arange(x_min, x_max, Delta)
+    interp_func = interp1d(t_conv, y_conv, bounds_error=False, fill_value=0)
+    y_full = interp_func(t_full)
+    
+    # Dividir en dos columnas
+    col1, col2 = st.columns(2)
+
+    # Contenedor de la animación (col1 para señales)
+    plot_placeholder_1 = col1.empty()
+    # Contenedor para la convolución (col2 para convolución)
+    plot_placeholder_2 = col2.empty()
+
+    # Crear la traza para la señal fija (x_t)
+    trace_fija = go.Scatter(x=t, y=x_t, mode='lines', name='Señal Fija')
+
+    # Crear la traza para la señal en movimiento (h_t)
+    trace_movil = go.Scatter(x=h, y=h_t, mode='lines', name='Señal en Movimiento')
+
+    # Crear la traza para la convolución (vacía por ahora)
+    trace_convolucion = go.Scatter(x=t_full, y=y_full, mode='lines', name='Convolución')
+
+    # Configuración del layout para señales
+    layout_señales = go.Layout(
+        xaxis=dict(showgrid=True, range=[x_min, x_max]),
+        yaxis=dict(showgrid=True),
+        title='Señales: Fija y en Movimiento'
+    )
+
+    layout_convolucion = go.Layout(
+        xaxis=dict(showgrid=True, range=[x_min, x_max]),
+        yaxis=dict(showgrid=True),
+        title='Convolución'
+    )
+
+    # Crear la figura con la convolución
+    fig_convolucion = go.Figure(data=[trace_convolucion], layout=layout_convolucion)
+
+    # Renderizar la figura actualizada en col2 (convolución)
+    plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True)
+
+    # Crear la figura con ambas señales en movimiento
+    fig_señales = go.Figure(data=[trace_fija, trace_movil], layout=layout_señales)
+
+    # Rango de movimiento de la señal móvil
+    shift_min = t[0] - 1 - h[0]
+    shift_max = t[-1] + 1 - h[-1]
+
+    # Animar la señal en movimiento (h_t)
+    for shift in np.linspace(shift_min, shift_max, 100):  # Ajustamos el rango de desplazamiento
+        # Actualizar los valores de X para mover la señal en movimiento
+        new_h = h + shift
+        fig_señales.data[1].x = new_h  # Actualizamos solo la señal en movimiento
+
+        # Renderizar la figura actualizada en col1 (señales en movimiento)
+        plot_placeholder_1.plotly_chart(fig_señales, use_container_width=True)
+
+        # Agregar un pequeño retardo para la animación
+        time.sleep(0.1)
 
 
 st.set_page_config(layout="wide")
@@ -159,8 +212,12 @@ elif operation == "Continua":
             st.error("Seleccione la señal a invertir")
         else:
             if inv == "x(t)":
-                t_xinv, x_inv = invertir(x, y)
-                grafica_continua(t_xinv, x_inv, "green", "x(t) invertida")
+                t_inv, x_inv = invertir(x, y)
+                grafica_continua(t_inv, x_inv, "green", "x(t) invertida")
+                st.markdown("### Proceso de convolución ###")
+                graficar(h, z, x, y)
             elif inv == "h(t)":
-                t_hinv, h_inv = invertir(h, z)
-                grafica_continua(t_hinv, h_inv, "green", "h(t) invertida")
+                t_inv, x_inv = invertir(h, z)
+                grafica_continua(t_inv, x_inv, "green", "h(t) invertida")
+                st.markdown("### Proceso de convolución ###")
+                graficar(x, y, h, z)
