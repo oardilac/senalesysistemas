@@ -209,99 +209,83 @@ def stem(n, f, title, color):
     fig.update_xaxes(showgrid=True)
     fig.update_yaxes(showgrid=True)
 
-    # Mostrar gráfico
-    st.plotly_chart(fig, use_container_width=True)
+    return fig
 
 def invertir_discreta(x, y):
     return [-1 * i for i in x[::-1]], y[::-1]
 
 def convolucion_discreta(x, h, x_n, h_n):
     # Longitudes de las señales
-    Lx = len(x)
     Lh = len(h)
+
+    Pi_x = x[0]
+    Pf_x = x[-1]
+    Pi_h = h[0]
+
+    # Convolución
+    y_n = np.convolve(x_n, h_n)
+    # Ajustar el tiempo para la convolución
+    n_conv = np.arange(Pi_x + Pi_h, Pi_x + Pi_h + len(y_n))
+
+    interp_func = interp1d(n_conv, y_n, bounds_error=False, fill_value=0)
     
-    # Tamaño de la señal convolucionada
-    Lc = Lx + Lh - 1
-    
-    # Inicializar resultado de la convolución
-    y = np.zeros(Lc)
-    
-    # Indices de tiempo para la convolución
-    n_conv = np.arange(x_n[0] + h_n[0], x_n[-1] + h_n[-1] + 1)
+    eje_n = np.arange(Pi_x - Lh, Pf_x + Lh + 1)
+    y_full = interp_func(eje_n)
+
+    h, h_n = invertir_discreta(h, h_n)
+
+    fig_senales_fija = stem(x, x_n, "Señal Fija", "red")
+    fig_senales_movil = stem(h, h_n, "Señal en Movimiento", "blue")
+    fig_combined = go.Figure(data=fig_senales_fija.data + fig_senales_movil.data)
+
+    fig_combined.update_layout(
+        title='Señales: Fija y en Movimiento',
+        xaxis=dict(showgrid=True, range=[Pi_x - Lh, Pf_x + Lh + 1]),
+        yaxis=dict(showgrid=True),
+    )
+
+    # Crear la figura para la convolución
+    trace_convolucion = go.Scatter(
+        x=eje_n,
+        y=y_full,
+        mode='lines+markers',
+        marker=dict(size=10, color='green'),
+        line=dict(color='green', dash="dash"),
+        name="Convolución"
+    )
+
+    layout_convolucion = go.Layout(
+        xaxis=dict(showgrid=True, autorange=True),
+        yaxis=dict(showgrid=True),
+        title='Convolución'
+    )
+
+    fig_convolucion = go.Figure(data=[trace_convolucion], layout=layout_convolucion)
+
 
     # Configuración de las columnas en Streamlit
     col1, col2 = st.columns(2)
-
-    # Graficar la señal fija (x[n])
-    trace_x = go.Scatter(x=x_n, y=x, mode='markers+lines', name='Señal x[n]')
-    
-    # Crear layout para la gráfica de las señales
-    layout_signals = go.Layout(
-        title="Señal fija x[n] y señal desplazada h[n-k]",
-        xaxis=dict(title="n"),
-        yaxis=dict(title="Amplitud"),
-        showlegend=True
-    )
-
-    # Crear la figura con la señal fija
-    fig_signals = go.Figure(data=[trace_x], layout=layout_signals)
-
-    # Crear la gráfica de la convolución (inicialmente vacía)
-    layout_conv = go.Layout(
-        title="Resultado de la convolución y[n]",
-        xaxis=dict(title="n"),
-        yaxis=dict(title="Amplitud"),
-        showlegend=True
-    )
-    
-    fig_conv = go.Figure(layout=layout_conv)
-    
-    # Renderizar ambas gráficas inicialmente
     plot_placeholder_1 = col1.empty()
+    # Contenedor para la convolución (col2 para convolución)
     plot_placeholder_2 = col2.empty()
-    
-    # Mostrar las señales y la convolución inicial
-    plot_placeholder_1.plotly_chart(fig_signals, use_container_width=True)
-    plot_placeholder_2.plotly_chart(fig_conv, use_container_width=True)
 
-    # Animar la convolución paso a paso
-    for n in range(Lc):
-        # Desplazamos h[n] y multiplicamos
-        h_desplazada = np.zeros(Lc)
+    plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True, key="convolution_chart")
 
-        # Aquí verificamos que no tratemos de asignar más valores de los que caben en el array
-        desplazamiento_max = min(Lh, Lc - n)
-        h_desplazada[n:n+desplazamiento_max] = h[:desplazamiento_max]
-        
-        # Actualizamos la gráfica de h[n] desplazada
-        if len(fig_signals.data) > 1:
-            # Actualizamos la traza de h[n] existente
-            fig_signals.data[1].x = n_conv
-            fig_signals.data[1].y = h_desplazada
-        else:
-            # Agregamos la traza de h[n] desplazada si no existe
-            trace_h = go.Scatter(x=n_conv, y=h_desplazada, mode='markers+lines', name=f'h[n-{n}]', marker=dict(color='orange'))
-            fig_signals.add_trace(trace_h)
+    # Loop para actualizar las señales
+    for n in range(len(y_full)):
+        new_h = h + eje_n[n]
+        # Actualizar la señal desplazada en la gráfica
+        fig_senales_movil.data[1].y = new_h  # Actualiza la traza de h[k-n]
 
-        # Calcular la multiplicación en cada punto y el valor parcial de la convolución
-        y[n] = np.sum(x * h_desplazada[:Lx])
-        
-        # Actualizamos la gráfica de la convolución con el nuevo valor
-        if len(fig_conv.data) > 0:
-            # Si ya existe la traza de convolución, actualizamos
-            fig_conv.data[0].y = y
-        else:
-            # Si no existe, la creamos
-            trace_y = go.Scatter(x=n_conv, y=y, mode='markers+lines', name='Convolución y[n]', marker=dict(color='blue'))
-            fig_conv.add_trace(trace_y)
-        
-        # Mostrar las señales actualizadas y la convolución
-        plot_placeholder_1.plotly_chart(fig_signals, use_container_width=True)
-        plot_placeholder_2.plotly_chart(fig_conv, use_container_width=True)
-        
-        # Agregar un retardo para la animación
+        # Actualizar la convolución parcial en la gráfica
+        fig_convolucion.data[0].y = y_full[:n+1]  # Mostrar la convolución parcial
+
+        # Mostrar los gráficos actualizados
+        plot_placeholder_1.plotly_chart(fig_combined, use_container_width=True, key=f"signal_chart_{n}")
+        plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True, key=f"convolution_chart_{n}")
+
         time.sleep(0.5)
-
+        
 st.set_page_config(layout="wide")
 st.title("Interfaz gráfica de convolución de señales")
 
@@ -384,22 +368,26 @@ elif operation == "Discreta":
             with col1:
                 x = na
                 y = xn_a
-                stem(na, xn_a, "x[n]", "blue")
+                graf = stem(na, xn_a, "x[n]", "blue")
+                st.plotly_chart(graf, use_container_width=True)
             with col2:
                 h = ha
                 z = hn_a
-                stem(ha, hn_a, "h[n]", "red")
+                graf = stem(ha, hn_a, "h[n]", "red")
+                st.plotly_chart(graf, use_container_width=True)
 
         elif punto == "B":
             col1, col2 = st.columns(2)
             with col1:
                 x = nb
                 y = xn_b
-                stem(nb, xn_b, "x[n]", "blue")
+                graf = stem(nb, xn_b, "x[n]", "blue")
+                st.plotly_chart(graf, use_container_width=True)
             with col2:
                 h = hb
                 z = hn_b
-                stem(hb, hn_b, "h[n]", "red")
+                graf = stem(hb, hn_b, "h[n]", "red")
+                st.plotly_chart(graf, use_container_width=True)
 
         invertir = st.sidebar.selectbox("Cual señal desea invertir", ["Seleccione", "x[n]", "h[n]"])
         if invertir == "Seleccione":
@@ -407,11 +395,12 @@ elif operation == "Discreta":
         else:
             if invertir == "x[n]":
                 x_inv, y_inv = invertir_discreta(x, y)
-                stem(x_inv, y_inv, "x[n] invertida", "green")
+                inv = stem(x_inv, y_inv, "x[n] invertida", "green")
+                st.plotly_chart(inv, use_container_width=True)
 
                 convolucion_discreta(h, x, z, y)
             elif invertir == "h[n]":
                 h_inv, z_inv = invertir_discreta(h, z)
-                stem(h_inv, z_inv, "h[n] invertida", "green")
-
-                convolucion_discreta(x, h, z, y)
+                inv = stem(h_inv, z_inv, "h[n] invertida", "green")
+                st.plotly_chart(inv, use_container_width=True)
+                convolucion_discreta(x, h, y, z)
