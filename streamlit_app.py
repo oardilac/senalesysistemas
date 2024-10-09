@@ -90,9 +90,7 @@ def graficar(t, x_t, h, h_t):
     # Definir los límites de las gráficas
     x_min = min(t.min()-5, h.min()-1)
     x_max = max(t.max()+5, h.max()+1)
-    t_full = np.arange(x_min, x_max, Delta)
-    y_full = interp_func(t_full)
-    
+
     # Dividir en dos columnas
     col1, col2 = st.columns(2)
 
@@ -107,9 +105,6 @@ def graficar(t, x_t, h, h_t):
     # Crear la traza para la señal en movimiento (h_t)
     trace_movil = go.Scatter(x=h, y=h_t, mode='lines', name='Señal en Movimiento')
 
-    # Crear la traza para la convolución (vacía por ahora)
-    trace_convolucion = go.Scatter(x=t_full, y=y_full, mode='lines', name='Convolución')
-
     # Configuración del layout para señales
     layout_señales = go.Layout(
         xaxis=dict(showgrid=True, range=[x_min, x_max]),
@@ -117,8 +112,21 @@ def graficar(t, x_t, h, h_t):
         title='Señales: Fija y en Movimiento'
     )
 
+    # Crear la figura con ambas señales en movimiento
+    fig_señales = go.Figure(data=[trace_fija, trace_movil], layout=layout_señales)
+
+    # Rango de movimiento de la señal móvil
+    shift_min = t[0] - 7 - h[0]
+    shift_max = t[-1] + 7 - h[-1]
+
+    x_full = np.arange(shift_min, shift_max, Delta)
+    y_full = interp_func(x_full)
+
+    # Crear la traza para la convolución (vacía por ahora)
+    trace_convolucion = go.Scatter(x=x_full, y=y_full, mode='lines', name='Convolución')
+
     layout_convolucion = go.Layout(
-        xaxis=dict(showgrid=True, range=[x_min, x_max]),
+        xaxis=dict(showgrid=True, autorange=True),
         yaxis=dict(showgrid=True),
         title='Convolución'
     )
@@ -129,24 +137,21 @@ def graficar(t, x_t, h, h_t):
     # Renderizar la figura actualizada en col2 (convolución)
     plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True)
 
-    # Crear la figura con ambas señales en movimiento
-    fig_señales = go.Figure(data=[trace_fija, trace_movil], layout=layout_señales)
-
-    # Rango de movimiento de la señal móvil
-    shift_min = t[0] - 7 - h[0]
-    shift_max = t[-1] + 7 - h[-1]
-
     # Animar la señal en movimiento (h_t)
-    for shift in np.linspace(shift_min, shift_max, 100):  # Ajustamos el rango de desplazamiento
+    for j in range(len(x_full)):
         # Actualizar los valores de X para mover la señal en movimiento
-        new_h = h + shift
+        new_h = h + x_full[j]
         fig_señales.data[1].x = new_h  # Actualizamos solo la señal en movimiento
 
         # Renderizar la figura actualizada en col1 (señales en movimiento)
+        fig_convolucion.data[0].y = y_full[:j+1]
+        
         plot_placeholder_1.plotly_chart(fig_señales, use_container_width=True)
 
+        # Renderizar la figura actualizada en col2 (convolución)
+        plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True)
         # Agregar un pequeño retardo para la animación
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 
 st.set_page_config(layout="wide")
