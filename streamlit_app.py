@@ -150,7 +150,7 @@ def graficar(t, x_t, h, h_t):
 
         # Renderizar la figura actualizada en col2 (convolución)
         plot_placeholder_2.plotly_chart(fig_convolucion, use_container_width=True)
-        # Agregar un pequeño retardo para la animación
+        # Agregar un pequeño retardo para la animación final
         time.sleep(0.01)
 
 
