@@ -81,16 +81,16 @@ def graficar(t, x_t, h, h_t):
     # Convolución usando numpy (sin hacer en cada paso)
     y_conv = np.convolve(x_t, h_t) * Delta
     # Ajustar el tiempo para la convolución
-    t_conv = np.arange(t[0] + h[0], t[-1] + h[-1] + 3*Delta, Delta)
+    t_conv = np.arange(t[0] + h[0], t[0] + h[0] + len(y_conv) * Delta, Delta)
 
     # Invertir la señal h(t)
-    h_t, h = invertir(h_t, h)
+    h, h_t = invertir(h, h_t)
     
-    # Definir los límites de las gráficas
-    x_min = min(t.min()-1, h.min()-1)
-    x_max = max(t.max()+1, h.max()+1)
-    t_full = np.arange(x_min, x_max, Delta)
     interp_func = interp1d(t_conv, y_conv, bounds_error=False, fill_value=0)
+    # Definir los límites de las gráficas
+    x_min = min(t.min()-5, h.min()-1)
+    x_max = max(t.max()+5, h.max()+1)
+    t_full = np.arange(x_min, x_max, Delta)
     y_full = interp_func(t_full)
     
     # Dividir en dos columnas
@@ -133,8 +133,8 @@ def graficar(t, x_t, h, h_t):
     fig_señales = go.Figure(data=[trace_fija, trace_movil], layout=layout_señales)
 
     # Rango de movimiento de la señal móvil
-    shift_min = t[0] - 1 - h[0]
-    shift_max = t[-1] + 1 - h[-1]
+    shift_min = t[0] - 7 - h[0]
+    shift_max = t[-1] + 7 - h[-1]
 
     # Animar la señal en movimiento (h_t)
     for shift in np.linspace(shift_min, shift_max, 100):  # Ajustamos el rango de desplazamiento
