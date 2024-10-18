@@ -253,7 +253,7 @@ def convolucion_discreta(x, h, x_n, h_n):
     for shift in range(len(y_full)):
         # Desplazar la señal móvil
         new_h = h + x_full[shift]
-        fig_senales_movil = stem(new_h, h_n, "Señal en Movimiento", "blue")
+        fig_senales_movil = stem(new_h, h_n, "Señal invertida", "blue")
 
         # Combinar la señal fija y la señal móvil desplazada
         fig_combined = go.Figure(data=fig_senales_fija.data + fig_senales_movil.data)
@@ -292,6 +292,34 @@ operation = st.sidebar.selectbox(
 
 # Menú inicial
 if operation == "Menú Inicial...":
+    st.markdown("""
+    La convolución es una operación fundamental en señales y sistemas que permite obtener la respuesta de un sistema lineal e invariante en el tiempo (LTI) a una entrada dada. 
+    Esta operación es importante tanto para sistemas discretos como continuos.
+    """)
+
+    # Explicación de convolución discreta
+    st.subheader("Convolución Discreta")
+    st.markdown(r"""
+    La convolución discreta entre dos señales, $$x[n]$$ y $$h[n]$$, se define como:
+
+    $$
+    y[n] = x[n] * h[n] = \sum_{k=-\infty}^{\infty} x[k]h[n - k]
+    $$
+
+    En esta ecuación, $$x[n]$$ es la señal de entrada y $$h[n]$$ es la respuesta al impulso del sistema. La salida $$y[n]$$ es el resultado de aplicar la convolución entre estas dos señales.
+    """)
+
+    # Explicación de convolución continua
+    st.subheader("Convolución Continua")
+    st.markdown(r"""
+    En el dominio continuo, la convolución entre dos señales $$x(t)$$ y $$h(t)$$ está dada por la integral:
+
+    $$
+    y(t) = \int_{-\infty}^{\infty} x(\tau)h(t - \tau)d\tau
+    $$
+
+    Al igual que en el caso discreto, $$x(t)$$ es la señal de entrada y $$h(t)$$ es la respuesta al impulso del sistema, pero la operación se realiza en el dominio continuo mediante una integral.
+    """)
     st.sidebar.markdown("Creado por: Oliver Ardila, Juan Bermejo y Daniel Henriquez")
 
     st.markdown("#### Agradecimientos ####")
@@ -382,7 +410,7 @@ elif operation == "Discreta":
                 st.plotly_chart(graf, use_container_width=True)
 
         elif punto == "B":
-            col1, col2 = st.columns(2)
+            col1, col2 = st.columnxs(2)
             with col1:
                 x = nb
                 y = xn_b
