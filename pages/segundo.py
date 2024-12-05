@@ -3,8 +3,6 @@ from scipy.io import wavfile
 import streamlit as st
 import plotly.graph_objs as go
 import io
-import matplotlib.pyplot as plt
-
 
 def grafica_continua(t, x_t, color, title):
     # Función para graficar una señal continua
