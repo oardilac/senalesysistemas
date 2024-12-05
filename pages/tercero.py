@@ -79,17 +79,19 @@ with col5:
 st.sidebar.header("Parametros de la señal")
 
 # Adjustable parameters
-fs = st.sidebar.slider("Frecuencia de muestreo (Hz)", 500, 2000, 1000)
+A1 = st.sidebar.number_input("Amplitud de la señal 1", value=1.0, key="a1")
+A2 = st.sidebar.number_input("Amplitud de la señal 2", value=1.0, key="a2")
+fs = st.sidebar.slider("Frecuencia de muestreo (Hz)", 2500, 3000, 2500)
 f_1 = st.sidebar.slider("Frecuencia de modulación de la señal 1 (Hz)", 1, 20, 5)
 f_2 = st.sidebar.slider("Frecuencia de modulación de la señal 2 (Hz)", 1, 20, 7)
-fo = st.sidebar.slider("Frecuencia de la portadora (Hz)", 50, 200, 100)
+fo = st.sidebar.slider("Frecuencia de la portadora (Hz)", 12000, 20000, 12000)
 w_cutoff = st.sidebar.slider("Frecuencia de corte del filtro (Hz)", 1, 50, 10)
 
 
 t = np.arange(0, 1, 1/fs)
 
-x1_t = np.cos(2 * np.pi * f_1 * t)
-x2_t = np.cos(2 * np.pi * f_2 * t)
+x1_t = A1*np.cos(2 * np.pi * f_1 * t)
+x2_t = A2*np.cos(2 * np.pi * f_2 * t)
 
 w0 = 2 * np.pi * fo
 p1_t = np.cos(w0 * t)

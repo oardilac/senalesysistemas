@@ -3,6 +3,8 @@ from scipy.io import wavfile
 import streamlit as st
 import plotly.graph_objs as go
 import io
+import matplotlib.pyplot as plt
+
 
 def grafica_continua(t, x_t, color, title):
     # Función para graficar una señal continua
@@ -89,7 +91,7 @@ if uploaded_file is not None:
         st.write(f"Duración: {length:.2f} segundos")
 
         # Create columns for audio players
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
             st.subheader("Audio original")
             # Reset the uploaded file position
@@ -110,12 +112,6 @@ if uploaded_file is not None:
         # Carrier parameters in sidebar
         st.sidebar.header("Parametros de la modulación")
         A = st.sidebar.slider("Amplitud de la portadora", 0.1, 2.0, 1.0)
-
-        # Carrier frequency selector
-        f = st.sidebar.slider("Frecuencia de la portadora (Hz)", 
-                                min_value=90000,
-                                max_value=200000,
-                                value=100000)
         
         # Filter cutoff frequency
         w_corte = st.sidebar.slider("Frecuencia de corte (Hz)",
@@ -127,6 +123,7 @@ if uploaded_file is not None:
         tiempo = n / fs       # Duración del audio
         Delta_t = 1 / fs      # Tiempo de muestreo
         t = np.arange(n) * Delta_t
+        grafica_continua(t, x_t, "blue", "Señal original")
 
         # Cálculo del espectro
         X_w = np.fft.fft(x_t)            # Transformada de Fourier de x(t)
@@ -136,21 +133,32 @@ if uploaded_file is not None:
         #magnitud = np.abs(X_w_cent) / np.max
         magnitud = np.abs(X_w_cent) / n
 
+        grafica_frec(f, magnitud, "red", "Espectro de la señal original")
+
         # Filtro pasa bajas
         fpb = np.abs(f) <= w_corte  # Frecuencia de corte, en este caso 1000 Hz
+        grafica_frec(f, fpb, "green", "Filtro pasa bajas")
 
         X_w_fil = X_w_cent * fpb
+        grafica_frec(f, np.abs(X_w_fil) / np.max(np.abs(X_w_fil)), "purple", "Espectro de la señal filtrada")
 
         X_w_filt_corrida = np.fft.ifftshift(X_w_fil)    # Corrimiento del espectro
         x_t_filt = np.fft.ifft(X_w_filt_corrida)       # Transformada inversa
+
+        # Carrier frequency selector
+        f = st.sidebar.slider("Frecuencia de la portadora (Hz)", 
+                                min_value=90000,
+                                max_value=200000,
+                                value=100000)
 
         w=2*np.pi*f
         pt=A*np.cos(w*t)
         fsp=fs*60
         T=1/fsp
-        n=len(x_t_filt )
+        n=len(x_t_filt)
         t1=np.arange(n)*T
         pt2=A*np.cos(w*t1)   #Señal portadora
+        grafica_continua(t, pt2, "orange", "Señal portadora")
 
         # Cálculo del espectro
         yt=x_t_filt*pt
@@ -160,6 +168,7 @@ if uploaded_file is not None:
         w_p = np.linspace(-len(pt)/2,len(pt)/2,len(pt))
         magnitud = np.abs(Y_w_cent) / n
 
+        grafica_frec(w_p, np.abs(Y_w_cent) / np.max(np.abs(X_w_fil)), "purple", "Espectro de la señal modulada")
         xtdem=yt*pt
 
         # Cálculo del espectro
@@ -168,8 +177,10 @@ if uploaded_file is not None:
         Delta_f = 1 / (n * Delta_t)
         magnitud = np.abs(X_w_demcent) / n
         f = np.arange(-len(xtdem)/2, len(xtdem)/2) * Delta_f
+        grafica_frec(f, np.abs(X_w_demcent) / np.max(np.abs(X_w_demcent)), "yellow", "Espectro de la señal demodulada")
 
         X_w_fil2 = X_w_demcent * fpb
+        grafica_frec(f, np.abs(X_w_fil) / np.max(np.abs(X_w_fil)), "grey", "Espectro de la señal filtrada")
         XWrecup = np.fft.ifftshift(X_w_fil2)    # Corrimiento del espectro
         x_t_filt2= np.fft.ifft(XWrecup)       # Transformada inversa
 
@@ -178,14 +189,11 @@ if uploaded_file is not None:
             recovered_audio = create_audio_file(x_t_filt, fs)
             st.audio(recovered_audio)
 
-        grafica_continua(t, x_t, "blue", "Señal original")
-        grafica_frec(f, magnitud, "red", "Espectro de la señal original")
-        grafica_frec(f, fpb, "green", "Filtro pasa bajas")
-        grafica_frec(f, np.abs(X_w_fil) / np.max(np.abs(X_w_fil)), "purple", "Espectro de la señal filtrada")
-        grafica_continua(t, pt2, "orange", "Señal portadora")
-        grafica_frec(w_p, np.abs(Y_w_cent) / np.max(np.abs(X_w_fil)), "purple", "Espectro de la señal modulada")
-        grafica_frec(f, np.abs(X_w_demcent) / np.max(np.abs(X_w_demcent)), "yellow", "Espectro de la señal demodulada")
-        grafica_frec(f, np.abs(X_w_fil) / np.max(np.abs(X_w_fil)), "grey", "Espectro de la señal filtrada")
+        with col3:
+            st.subheader("Audio recuperado")
+            recovered_audio = create_audio_file(x_t_filt2, fs)
+            st.audio(recovered_audio)
+
     except Exception as e:
         st.error(f"Error procesando archivo: {str(e)}")
 else:
