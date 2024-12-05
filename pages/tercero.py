@@ -122,9 +122,9 @@ y2_dem = y_t * p2_t
 w_1_dem, y1_dem_w_normalized = calc_fft(y1_dem)
 w_2_dem, y2_dem_w_normalized = calc_fft(y2_dem)
 
+st.header("Señales de entrada")
 col1, col2 = st.columns(2)
 # Visualización de las señales
-st.header("Señales de entrada")
 
 with col1:
     grafica_continua(t, x1_t, "blue", 'Señal 1 - Dominio del tiempo')
@@ -140,10 +140,12 @@ col1, col2 = st.columns(2)
 with col1:
     grafica_continua(t, x1_mod, "blue", 'Señal 1 Modulada - Dominio del tiempo')
     grafica_continua(t, x2_mod, "red", 'Señal 2 Modulada - Dominio del tiempo')
+    grafica_continua(t, y_t, "green", 'Señal y_t Modulada - Dominio del tiempo')
 
 with col2:
     grafica_frec(w_1_mod, x1_mod_w_normalized, "blue", 'Señal 1 Modulada - Dominio de la frecuencia')
     grafica_frec(w_2_mod, x2_mod_w_normalized, "red", 'Señal 2 Modulada - Dominio de la frecuencia')
+    grafica_frec(w_total, y_w_normalized, "green", 'Señal y_t Modulada - Dominio de la frecuencia')
 
 st.header("Señales demoduladas")
 col1, col2 = st.columns(2)
