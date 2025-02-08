@@ -102,6 +102,8 @@ def convolucion_continua(t, x_t, h, h_t, key_prefix=""):
 st.set_page_config(layout="wide")
 st.title("Interfaz gráfica de convolución de señales")
 
+st.sidebar.markdown("Creado por: Oliver Ardila y Jesus Carmona")
+
 bw = st.sidebar.slider(
     "Seleccione el ancho de banda del sistema",
     min_value=0.1,
