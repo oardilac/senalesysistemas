@@ -142,6 +142,7 @@ with col2:
     grafica_continua(td_T, x_td, "red", f"h(t) con τ = 1")
 
 st.markdown("#### Proceso de convolución ####")
+st.sidebar.markdown("Creado por: Oliver Ardila y Jesus Carmona")
 
 # Iteramos sobre cada valor de τ para generar y graficar la convolución
 for tau in taus:
@@ -155,4 +156,3 @@ for tau in taus:
     # Llamamos a la función de convolución, pasando un prefijo único basado en τ
     convolucion_continua(ta_T, x_ta, td2, xd2, key_prefix=f"tau_{tau}")
 
-st.sidebar.markdown("Creado por: Oliver Ardila y Jesus Carmona")
